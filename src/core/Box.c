@@ -35,6 +35,9 @@ bool Box_SolveCollision(Vec2 *a_pos, const Vec2 *a_size, const Vec2 *b_pos, cons
 	else if(a_pos->y + a_size->y > b_pos->y && a_pos->y < b_pos->y)
 		dir_y = b_pos->y - (a_pos->y + a_size->y);
 
+	dir_x *= 1.01f;
+	dir_y *= 1.01f;
+
 	if(fabsf(dir_x) < fabsf(dir_y)){
 		a_pos->x += dir_x;
 

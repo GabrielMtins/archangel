@@ -9,7 +9,7 @@
 #include "engine/Game.h"
 #include "game/Entities.h"
 
-#define MEMORY_SIZE (4 * 1024 * 1024)
+#define MEMORY_SIZE (1 * 1024 * 1024)
 
 int main(void){
 	Context *context;
