@@ -20,6 +20,8 @@
 #define TILE_WIDTH 16
 #define TILE_HEIGHT 16
 
+#define MAX_TIMERS 4
+
 typedef int8_t Tile;
 
 typedef struct game_s Game;
@@ -35,12 +37,6 @@ enum PauseMode {
 typedef struct {
 	Texture textures[MAX_TEXTURES];
 } Resources;
-
-typedef struct {
-	bool can_jump;
-	bool is_falling;
-	uint32_t tick_floor;
-} EntVars;
 
 struct entity_s {
 	Vec2 position;
@@ -59,6 +55,8 @@ struct entity_s {
 
 	/* Tick when the think() function will be called again. */
 	uint32_t next_think;
+
+	bool is_trigger;
 
 	/* A mask of collision layers. */
 	uint32_t collision_layer;
@@ -105,7 +103,16 @@ struct entity_s {
 	 * next frame. */
 	bool free;
 
-	EntVars v;
+	/* --------- END OF DEFAULT PROPERTIES --------- */
+
+	/* Add your custom properties here.
+	 * ... */
+
+	bool can_jump;
+	bool is_falling;
+	bool going_right;
+	uint32_t tick_floor;
+	uint32_t timers[MAX_TIMERS];
 };
 
 typedef struct {
@@ -129,7 +136,10 @@ struct scene_s {
 	World world;
 
 	Entity entities[MAX_ENTITIES];
-	size_t top;
+	size_t num_entities;
+
+	Entity *removed[MAX_ENTITIES];
+	size_t num_removed;
 
 	Vec2 camera;
 	uint32_t tick;

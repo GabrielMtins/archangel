@@ -44,14 +44,15 @@ int main(void){
 
 	scene->world.texture = &game->res.textures[1];
 	Player_Create(scene);
+	Grounder_Create(scene);
 
-	Scene_SetWorldTile(scene, 3, 2, 1, 0);
-	Scene_SetWorldTile(scene, 4, 2, 1, 0);
-	Scene_SetWorldTile(scene, 5, 2, 1, 0);
+	for(int i = 0; i < 20; i++){
+		Scene_SetWorldTile(scene, i, 6, 1, 0);
+	}
 
-	Scene_SetWorldTile(scene, 3, 6, 1, 0);
-	Scene_SetWorldTile(scene, 4, 6, 1, 0);
-	Scene_SetWorldTile(scene, 5, 6, 1, 0);
+	Scene_SetWorldTile(scene, 0, 5, 1, 0);
+	Scene_SetWorldTile(scene, 10, 5, 1, 0);
+	Scene_SetWorldTile(scene, 19, 5, 1, 0);
 
 	Texture_Load(
 			&game->res.textures[0],
@@ -67,6 +68,14 @@ int main(void){
 			"tilemap.png",
 			16,
 			16
+			);
+
+	Texture_Load(
+			&game->res.textures[2],
+			context,
+			"res/entities/bullet.png",
+			4,
+			4
 			);
 
 	Game_Run(game);

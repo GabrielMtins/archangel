@@ -6,6 +6,6 @@
 
 bool Box_CheckCollisionBoxBox(const Vec2 *a_pos, const Vec2 *a_size, const Vec2 *b_pos, const Vec2 *b_size);
 
-bool Box_SolveCollision(Vec2 *a_pos, const Vec2 *a_size, const Vec2 *b_pos, const Vec2 *b_size);
+bool Box_SolveCollision(Vec2 *a_pos, const Vec2 *a_size, const Vec2 *b_pos, const Vec2 *b_size, bool *solved_x_axis);
 
 #endif

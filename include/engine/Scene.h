@@ -9,7 +9,7 @@ void Scene_Update(Scene *scene, uint32_t delta_tick);
 
 void Scene_Render(Scene *scene, Context *context);
 
-Entity * Scene_FindEntityType(Scene *scene, int type);
+Entity * Scene_SearchByEntityType(Scene *scene, int type);
 
 Entity * Scene_AddEntity(Scene *scene);
 

@@ -9,10 +9,12 @@ static void Scene_RenderEntities(Scene *scene, Context *context);
 static void Scene_RenderTile(Scene *scene, Context *context, int x, int y, int layer);
 static void Scene_RenderWorld(Scene *scene, Context *context, int layer);
 static void Scene_HandleEntityCollision(Scene *scene);
+static void Scene_RemoveEntity(Scene *scene, size_t id);
 
 void Scene_Create(Scene *scene, Game *game){
 	scene->game = game;
-	scene->top = 0;
+	scene->num_entities = 0;
+	scene->num_removed = 0;
 
 	for(int i = 0; i < WORLD_DATA_SIZE; i++)
 		scene->world.tiles[i] = -1;
@@ -36,11 +38,11 @@ void Scene_Render(Scene *scene, Context *context){
 	Scene_RenderWorld(scene, context, WORLD_FOREGROUND_LAYER);
 }
 
-Entity * Scene_FindEntityType(Scene *scene, int type){
+Entity * Scene_SearchByEntityType(Scene *scene, int type){
 	Entity *found = NULL;
 	Entity *current;
 
-	for(size_t i = 0; i < scene->top; i++){
+	for(size_t i = 0; i < scene->num_entities; i++){
 		current = &scene->entities[i];
 
 		if(current->removed)
@@ -66,7 +68,12 @@ Entity * Scene_FindEntityType(Scene *scene, int type){
 Entity * Scene_AddEntity(Scene *scene){
 	Entity *new_entity;
 
-	new_entity = &scene->entities[scene->top++];
+	if(scene->num_removed > 0){
+		new_entity = scene->removed[--scene->num_removed];
+	}
+	else{
+		new_entity = &scene->entities[scene->num_entities++];
+	}
 
 	Entity_Reset(new_entity);
 
@@ -75,23 +82,36 @@ Entity * Scene_AddEntity(Scene *scene){
 
 void Scene_SolveEntityCollision(Scene *scene, Entity *entity, Entity *other){
 	Vec2 og_pos;
+	bool solved_x_axis;
 
 	og_pos = entity->position;
 
-	Box_SolveCollision(&entity->position, &entity->hitbox_size, &other->position, &other->hitbox_size);
+	Box_SolveCollision(&entity->position, &entity->hitbox_size, &other->position, &other->hitbox_size, &solved_x_axis);
 
-	if(!Scene_CheckCollisionEntityWorld(scene, entity))
+	if(!Scene_CheckCollisionEntityWorld(scene, entity)){
+		if(solved_x_axis)
+			entity->velocity.x = 0.0f;
+		else
+			entity->velocity.y = 0.0f;
+
 		return;
+	}
 	/* If the entity was pushed to collide with a world tile,
 	 * revert to the original position. */
 
 	entity->position = og_pos;
 	og_pos = other->position;
 
-	Box_SolveCollision(&other->position, &other->hitbox_size, &entity->position, &entity->hitbox_size);
+	Box_SolveCollision(&other->position, &other->hitbox_size, &entity->position, &entity->hitbox_size, NULL);
 
-	if(!Scene_CheckCollisionEntityWorld(scene, other))
+	if(!Scene_CheckCollisionEntityWorld(scene, other)){
+		if(solved_x_axis)
+			other->velocity.x = 0.0f;
+		else
+			other->velocity.y = 0.0f;
+
 		return;
+	}
 	/* If the other was pushed to collide with a world tile,
 	 * revert to the original position. */
 
@@ -160,14 +180,12 @@ static void Scene_UpdateEntities(Scene *scene, float dt){
 	Entity *current_entity;
 	bool found_collision;
 
-	for(size_t i = 0; i < scene->top; i++){
+	for(size_t i = 0; i < scene->num_entities; i++){
 		found_collision = false;
 		current_entity = &scene->entities[i];
 
-		if(current_entity->free){
-			current_entity->removed = true;
-			current_entity->free = false;
-		}
+		if(current_entity->free)
+			Scene_RemoveEntity(scene, i);
 
 		if(current_entity->removed)
 			continue;
@@ -217,7 +235,7 @@ static void Scene_RenderEntities(Scene *scene, Context *context){
 	Entity *current_entity;
 	Vec2 start, end;
 
-	for(size_t i = 0; i < scene->top; i++){
+	for(size_t i = 0; i < scene->num_entities; i++){
 		current_entity = &scene->entities[i];
 
 		if(current_entity->removed)
@@ -285,7 +303,7 @@ static void Scene_RenderWorld(Scene *scene, Context *context, int layer){
 static void Scene_HandleEntityCollision(Scene *scene){
 	Entity *current, *other;
 
-	for(size_t i = 0; i < scene->top; i++){
+	for(size_t i = 0; i < scene->num_entities; i++){
 		current = &scene->entities[i];
 
 		if(current->removed)
@@ -294,7 +312,7 @@ static void Scene_HandleEntityCollision(Scene *scene){
 		if(current->collision_mask == 0)
 			continue;
 
-		for(size_t j = 0; j < scene->top; j++){
+		for(size_t j = 0; j < scene->num_entities; j++){
 			if(i == j)
 				continue;
 
@@ -309,8 +327,21 @@ static void Scene_HandleEntityCollision(Scene *scene){
 			if(!Box_CheckCollisionBoxBox(&current->position, &current->hitbox_size, &other->position, &other->hitbox_size))
 				continue;
 
+			if(!current->is_trigger){
+				Scene_SolveEntityCollision(scene, current, other);
+			}
+
 			if(current->onCollision != NULL)
 				current->onCollision(current, other, scene);
+
+			if(other->onCollision != NULL)
+				other->onCollision(other, current, scene);
 		}
 	}
+}
+
+static void Scene_RemoveEntity(Scene *scene, size_t id){
+	scene->entities[id].free = false;
+	scene->entities[id].removed = true;
+	scene->removed[scene->num_removed++] = &scene->entities[id];
 }
