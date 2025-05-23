@@ -1,5 +1,18 @@
 # archangel
 
+## Programação
+
+Para fazer:
+- Sistema de animações
+- Sistema de flip de texturas
+- Carregamento de fases com json
+- Sistema de efeitos sonoros
+- Sistema de música
+- Sistema de pause
+
+Feito:
+- Adicionar collision triggers
+
 ## Inimigos
 
 Para fazer:
@@ -13,3 +26,5 @@ Para fazer:
 
 Já feitos
 - TBD
+
+Fazer sprites para cada um dos inimigos
