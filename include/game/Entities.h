@@ -20,4 +20,6 @@ Entity * Bullet_Create(Scene *scene);
 
 Entity * Grounder_Create(Scene *scene);
 
+Entity * Jumper_Create(Scene *scene);
+
 #endif

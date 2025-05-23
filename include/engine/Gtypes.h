@@ -41,6 +41,7 @@ typedef struct {
 struct entity_s {
 	Vec2 position;
 	Vec2 velocity;
+	Vec2 direction;
 
 	Vec2 hitbox_size;
 
@@ -56,13 +57,17 @@ struct entity_s {
 	/* Tick when the think() function will be called again. */
 	uint32_t next_think;
 
-	bool is_trigger;
+	bool active;
 
 	/* A mask of collision layers. */
 	uint32_t collision_layer;
 	/* A mask which contains which layers the entity
 	 * can collide with. */
 	uint32_t collision_mask;
+
+	/* A mask whcih contains which layers the entity can trigger
+	 * its onCollision() function. */
+	uint32_t collision_trigger;
 
 	Texture *texture;
 
@@ -109,8 +114,6 @@ struct entity_s {
 	 * ... */
 
 	bool can_jump;
-	bool is_falling;
-	bool going_right;
 	uint32_t tick_floor;
 	uint32_t timers[MAX_TIMERS];
 };

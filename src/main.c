@@ -9,7 +9,7 @@
 #include "engine/Game.h"
 #include "game/Entities.h"
 
-#define MEMORY_SIZE (1 * 1024 * 1024)
+#define MEMORY_SIZE (4 * 1024 * 1024)
 
 int main(void){
 	Context *context;
@@ -44,7 +44,7 @@ int main(void){
 
 	scene->world.texture = &game->res.textures[1];
 	Player_Create(scene);
-	Grounder_Create(scene);
+	Jumper_Create(scene);
 
 	for(int i = 0; i < 20; i++){
 		Scene_SetWorldTile(scene, i, 6, 1, 0);

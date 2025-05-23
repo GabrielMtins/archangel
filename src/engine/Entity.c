@@ -11,10 +11,11 @@ void Entity_Reset(Entity *entity){
 	entity->type = -1;
 	entity->next_think = 0;
 
-	entity->is_trigger = false;
+	entity->active = true;
 
 	entity->collision_layer = 0;
 	entity->collision_mask = 0;
+	entity->collision_trigger = 0;
 	
 	entity->texture = NULL;
 	entity->hud_element = false;

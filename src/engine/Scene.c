@@ -302,6 +302,7 @@ static void Scene_RenderWorld(Scene *scene, Context *context, int layer){
 
 static void Scene_HandleEntityCollision(Scene *scene){
 	Entity *current, *other;
+	bool mask, trigger;
 
 	for(size_t i = 0; i < scene->num_entities; i++){
 		current = &scene->entities[i];
@@ -309,7 +310,7 @@ static void Scene_HandleEntityCollision(Scene *scene){
 		if(current->removed)
 			continue;
 
-		if(current->collision_mask == 0)
+		if(current->collision_mask == 0 && current->collision_trigger == 0)
 			continue;
 
 		for(size_t j = 0; j < scene->num_entities; j++){
@@ -321,20 +322,23 @@ static void Scene_HandleEntityCollision(Scene *scene){
 			if(other->removed)
 				continue;
 
-			if((current->collision_mask & other->collision_layer) == 0)
+			mask = current->collision_mask & other->collision_layer;
+			trigger = current->collision_trigger & other->collision_layer;
+
+			if(!mask && !trigger)
 				continue;
 
 			if(!Box_CheckCollisionBoxBox(&current->position, &current->hitbox_size, &other->position, &other->hitbox_size))
 				continue;
 
-			if(!current->is_trigger){
+			if(mask){
 				Scene_SolveEntityCollision(scene, current, other);
 			}
 
 			if(current->onCollision != NULL)
 				current->onCollision(current, other, scene);
 
-			if(other->onCollision != NULL)
+			if(other->onCollision != NULL && mask)
 				other->onCollision(other, current, scene);
 		}
 	}

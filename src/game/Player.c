@@ -14,6 +14,7 @@ Entity * Player_Create(Scene *scene){
 	entity->hitbox_size = (Vec2) {17.0f, 19.0f};
 	entity->collision_layer = 2;
 	entity->collision_mask = 1;
+	entity->collision_trigger = 8;
 
 	entity->type = ENTITY_PLAYER;
 
@@ -28,7 +29,7 @@ static void Player_Update(Entity *entity, Scene *scene, float dt){
 		if(scene->tick - entity->tick_floor > 120)
 			entity->can_jump = false;
 
-		entity->is_falling = entity->velocity.y > 0.0f;
+		entity->direction.y = entity->velocity.y;
 	}
 
 	entity->velocity.y += GRAVITY * dt;
@@ -52,9 +53,15 @@ static void Player_Update(Entity *entity, Scene *scene, float dt){
 
 static void Player_Collision(Entity *entity, Entity *other, Scene *scene){
 	(void) other;
+	(void) scene;
 
-	if(entity->velocity.y == 0.0f && entity->is_falling){
-		entity->can_jump = true;
-		entity->tick_floor = scene->tick;
+	if(entity->velocity.y == 0.0f){
+		if(entity->direction.y > 0.0f){
+			entity->can_jump = true;
+			entity->tick_floor = scene->tick;
+		}
+		else{
+			entity->velocity.y = entity->direction.y;
+		}
 	}
 }
